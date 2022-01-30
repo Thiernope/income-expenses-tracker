@@ -1,0 +1,59 @@
+.add {
+	color: green;
+	width: 30px;
+	height: 30px;
+	margin-left: auto;
+}
+.headerExp {
+	background-color: rgb(241, 88, 96);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px;
+	position: sticky;
+	top: 0;
+}
+.loader {
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.trash {
+	width: 30px;
+	height: 30px;
+}
+
+.btDiv {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	position: sticky;
+	bottom: 0;
+	left: auto;
+	right: auto;
+	width: 100%;
+	margin-top: auto;
+}
+
+.title {
+	margin-top: 0px;
+}
+
+.btn {
+	padding: 0.2rem;
+	margin-top: 1rem;
+}
+
+.txt {
+	margin-top: 100px;
+	color: black;
+}
+.empty {
+	display: flex;
+	justify-content: "flex-center";
+	flex-direction: column;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+}
