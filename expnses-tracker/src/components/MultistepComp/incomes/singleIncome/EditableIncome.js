@@ -12,7 +12,6 @@ const EditableIncome = ({editInputRef, cancelEdit, income, incomeList, setIncome
     const [colorPicker, setColorPicker ] = useState(false);
     const initialType = income.type
     const initialColor = income.color
-    const incId = income._id
     const [formData, setFormData ] = useState({
         type: initialType,
         color: initialColor,
@@ -54,7 +53,6 @@ const EditableIncome = ({editInputRef, cancelEdit, income, incomeList, setIncome
                })
     
                const data = await res.json();
-               console.log("DATA", data.updatedIncomeType)
                if(data.message === "Updated Successfully") {
                setTimeout(()=>{
                    setMessage("Updated Successfully")
@@ -104,6 +102,7 @@ const EditableIncome = ({editInputRef, cancelEdit, income, incomeList, setIncome
      <DatePicker
         name = "date"
         placeholderText={'Select a date'} 
+        autoComplete = "off"
         selected={formData.date}
         onChange={date => setFormData({...formData, date: date})}
         dateFormat = "yyyy/MM/dd"

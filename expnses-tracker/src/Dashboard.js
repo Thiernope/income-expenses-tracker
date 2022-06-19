@@ -1,31 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import {BsFillLockFill} from "react-icons/bs"
 import { useSelector, useDispatch} from "react-redux"
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import Tabs from "./components/Transactions/Create/Tabs"
+import ChartDisplay from "./components/Analysis/ChartDisplay"
 import Split from "react-split"
 import Nav from "./components/Nav"
+import List from "./components/Transactions/List"
 import IncomeExpeParent from "./components/MultistepComp/IncomeExpeParent"
 import { ExpenseFetchPending, ExpenseFetchFailure, ExpenseFetchSuccess } from './components/MultistepComp/expenses/ExpenseSlice'
 import { IncomeFetchPending, IncomeFetchFailure, IncomeFetchSuccess } from './components/MultistepComp/incomes/IncomeSlice'
+import {transactionPending,transactionSuccess, transactionFailure} from "./components/Transactions/Create/transactionSlice"
+import {userPending,userSuccess, userFailure} from "./components/userProfile/UserSlice"
 const Dashboard = () => {
 const navigate = useNavigate();
 const dispatch = useDispatch();
 const { user } = useSelector(state => state.loginUser);
 const token = user.token;
-// const {isLoading, expense, error } = useSelector(state => state.fetchAllExpenses);
-// const expenseValue = Object.keys(expense).length !== 0 ? expense: [];
 const [expenseList, setExpenseList] = useState([])
-//console.log("EXXXKLSF", expenseList)
 const [expenseId, setExpenseId ] = useState(null)
 const [expenseFetchError, setExpenseFetchError] = useState(null)
-// const {isLoading: incomesLoading, income, error: incomesError } = useSelector(state => state.fetchAllIncomes);
-// const incomeValue = Object.keys(income).length !== 0 && income.length > 0 ? income: [];
 const [incomeList, setIncomeList] = useState([])
-console.log("INCCCskal", incomeList)
 const [incomeId, setIncomeId ] = useState(null)
 const [incomesFetchError, settIncomesFetchError] = useState(null)
-
-
+const [transactionList, setTransactionList] = useState([])
+const [balanceModal, setBalanceModal] = useState(false);
+const [profile, setProfile ] = useState(false)
+const toggleProfile = () => {
+  setProfile(!profile)
+}
+const showBalanceModal = () => {
+  setBalanceModal(!balanceModal)
+}
 const allIncomesUrl = "https://money-tracking-app-20.herokuapp.com/incomes/";
 const allExpensesUrl = "https://money-tracking-app-20.herokuapp.com/expenses";
 
@@ -105,19 +111,90 @@ useEffect(()=>{
   
   }
 
+  useEffect(()=>{
+    const getTransactions = async () => {
+        dispatch(transactionPending())
+     try {
+         const transactions = await fetchTransctions();
+         if(transactions.length >= 1) {
+             setTransactionList(transactions)
+             dispatch(transactionSuccess(transactions))
+         } 
+
+         if(transactions.error) {
+             dispatch(transactionFailure(transactions.error))
+         }
+         
+     } catch (error) {
+         console.log(error)
+     }
+    }
+    getTransactions()
+},[])
+
+  const transanctionUrl = 'https://money-tracking-app-20.herokuapp.com/transactions'
+    const fetchTransctions = async () => {
+        try {
+            const res = await fetch(transanctionUrl, {
+                method: 'GET',
+                headers: {
+                    'token': 'Bearer ' + token
+                }
+            })
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+     useEffect(()=>{
+       const getUserProfile = async() => {
+        dispatch(userPending())
+         try {
+          const userProfile = await fetchUserProfile();
+          console.log("User", userProfile)
+          if(userProfile) {
+            dispatch(userSuccess(userProfile))
+          }
+         } catch (error) {
+           console.log(error)
+           dispatch(userFailure(error))
+         }
+       }
+
+       getUserProfile();
+     }, [])
+
+
+
+    const userProfileUrl = "https://money-tracking-app-20.herokuapp.com/user/user-profile"
+
+        const fetchUserProfile = async() => {
+        try {
+          const res = await fetch(userProfileUrl, {
+            headers: {
+              'token': 'Bearer ' + token
+            }
+          })
+
+          const data = await res.json();
+          return data;
+        } catch (error) {
+          
+        }
+        }
 
   const logout = () => {
     localStorage.removeItem("persist:root");
-     return window.location.reload();
+    return window.location.replace("/login");
   }
 
     return (
       <div>
         { Object.keys(user).length !== 0 ?
         <div className="dashboard h-screen">
-        <h1 onClick={logout}>Logout</h1>
-           <Nav/>
-   
+           <Nav showBalanceModal= {showBalanceModal} toggleProfile ={toggleProfile}/>
         <div className="lg:hidden">
           <h1>for smartphones</h1>
         </div>
@@ -127,7 +204,7 @@ useEffect(()=>{
           direction="vertical" 
           minSize={0}
           sizes={[100, 0]}
-          style={{height: 'calc(100vh - 4rem)', overflow: 'hidden'}}>
+          style={{height:'100%'}}>
             <Split 
             gutterSize={4}
             direction="horizontal" 
@@ -146,17 +223,28 @@ useEffect(()=>{
               setIncomeList = {setIncomeList}
               incomeId = {incomeId}
               setIncomeId ={setIncomeId}
+             
               />
                <Split 
-               sizes={[70, 30]}
+               sizes={[50, 50]}
                gutterSize={4}
                minSize={0}
                direction="vertical"
                >
-                 <div>Form</div>
-                 <div>All transactions</div>
+               <div>
+               <div>
+               <Tabs expenseList={expenseList} incomeList={incomeList} transactionList={transactionList} setTransactionList={setTransactionList} balanceModal={balanceModal}/> 
+               </div>
+               </div>
+                 <div>
+                   <div>
+                     <List transactionList={transactionList} setTransactionList={setTransactionList}/>
+                   </div>
+                 </div>
                </Split>
-               <div className="">  <h1>Analysis space</h1></div>
+               <div className="">
+                 <ChartDisplay transactionList={transactionList} profile={profile} logout={logout} token={token}/>
+               </div>
             </Split>
             <div className=""></div>
           </Split>

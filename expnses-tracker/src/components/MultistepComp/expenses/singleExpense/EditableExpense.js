@@ -6,15 +6,12 @@ import useStyles from "./styles"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, expenseList}) => {
-    console.log("XXXXXEX", expense)
-    console.log("EXXX", expenseList)
     const [message, setMessage] = useState(null);
     const { user } = useSelector(state => state.loginUser);
     const token = user.token;
     const [colorPicker, setColorPicker ] = useState(false);
     const initialType = expense.type
     const initialColor = expense.color
-    const expId = expense._id
     const [formData, setFormData ] = useState({
         type: initialType,
         color: initialColor,
@@ -55,11 +52,9 @@ const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, exp
              })
   
              const data = await res.json();
-             console.log("DDDD", data)
              if(data.message === "Updated Successfully") {
             
               const newExpenseList = [...expenseList];
-              console.log("EXDXD", newExpenseList)
               const index = expenseList.findIndex(expense => expense._id === data.updatedExpense._id);
               newExpenseList[index] = data.updatedExpense;
               setExpenseList(newExpenseList)
@@ -102,6 +97,7 @@ const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, exp
      <DatePicker
         name = "date"
         placeholderText={'Select a date'} 
+        autoComplete = "off"
         selected={formData.date}
         onChange={date => setFormData({...formData, date: date})}
         dateFormat = "yyyy/MM/dd"

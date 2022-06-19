@@ -1,14 +1,13 @@
 import React, { useState, useRef} from 'react'
-import CrudIncome from "./CrudIncome";
+import CrudIncome from "./CreateIncome";
 import {IconButton} from "@material-ui/core"
 import Lottie from "react-lottie"
 import empty from "../../../assets/empty.json"
 import {Delete, Add } from "@material-ui/icons/";
 import ReadOnlyIncome from './singleIncome/ReadOnlyIncome'
 import EditableIncome from "./singleIncome/EditableIncome"
-import { PulseLoader } from "react-spinners"
 import "./incomes.css"
-const Incomes = ({handleNext,  incomesFetchError, incomeList, setIncomeList, incomeId, setIncomeId}) => {
+const Incomes = ({handleNext,incomesFetchError, incomeList, setIncomeList, incomeId, setIncomeId}) => {
 const [formComponent, setFormComponent] = useState(false);
 
 
@@ -61,6 +60,7 @@ const toggleEditInputRef = () => {
          </IconButton>
         </div>
         <CrudIncome formComponent={formComponent} hideForm ={hideForm} inputRef={inputRef} setIncomeList={setIncomeList} incomeList={incomeList}/>
+     
        {incomeList.length >= 1? 
       <div className="h-full">
       {incomeList.map((inc) => (
@@ -71,10 +71,10 @@ const toggleEditInputRef = () => {
         } 
         </div>
       ))}
-      </div>:
+      </div>: 
       <div className="empty">
       
-      <h1>No source of income list</h1>: 
+      <h1>No source of income list</h1>
      
        <Lottie options={defaultOptions}
          className="lottie"

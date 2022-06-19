@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import {ColorLens, DateRange, Close} from "@material-ui/icons/";
 import DatePicker from "react-datepicker"
-import { useSelector } from "react-redux"
+import PulseLoader from "react-spinners/PulseLoader"
+import { useSelector} from "react-redux"
 import Error from "../../notifications/Error"
-import Success from "../../notifications/Success"
 import "react-datepicker/dist/react-datepicker.css"
 import {IconButton} from "@material-ui/core"
 import {SliderPicker } from "react-color"
-const CrudIncome= ({formComponent, hideForm, inputRef, setIncomeList, incomeList}) => {
+
+const CreateIncome= ({formComponent, hideForm, inputRef, setIncomeList, incomeList}) => {
 const { user } = useSelector(state => state.loginUser)
 const [message, setMessage] = useState(null);
 const token = user.token;
 const [showDatePicker, setShowDatePicker] = useState(false);
 const [colorPicker, setColorPicker ] = useState(false);
+const [loader, setLoader] = useState(null)
 const [formData, setFormData ] = useState({
   type: "",
   color: "#26DA77",
@@ -21,7 +23,27 @@ const [formData, setFormData ] = useState({
 const createIncomeUrl = "https://money-tracking-app-20.herokuapp.com/incomes/"
 const handleSubmit = async (e) => {
   e.preventDefault();
+
+    if(formData.type === "") {
+      setMessage("Please, type the name")
+      return setTimeout(()=>{
+        setMessage("");
+      }, 2000)
+    } else if(formData.color === "") {
+      setMessage("Plase, select the color") 
+      return setTimeout(()=>{
+        setMessage("");
+      }, 2000)
+    } else if(formData.date === null) {
+      setMessage("Please Select a date")
+      return setTimeout(()=>{
+        setMessage("");
+      }, 2000)
+    }
+ 
+
 try {
+  setLoader(<PulseLoader size={5}/>)
   const res = await fetch(createIncomeUrl, {
     method: 'POST',
     headers: {
@@ -31,9 +53,10 @@ try {
     body: JSON.stringify(formData)
   })
   const data = await res.json();
+  console.log("DDKLSDf", data)
   if(data.message === "Created Successfully") {
+    setLoader(null)
     const createdIncome = data.createdIncome;
-    console.log("CREATED", createdIncome)
     setIncomeList([createdIncome, ...incomeList])
     hideForm();
     setFormData({
@@ -45,6 +68,7 @@ try {
       return setMessage(null)
     }, 1000);
   } else if(data.message === "The type of income already exsit") {
+    setLoader(<null/>)
     setMessage(<Error error = {data.message}/>)
     hideForm();
     setFormData({
@@ -59,6 +83,7 @@ try {
   }
 } catch (error) {
   console.log(error)
+ 
 }
 }
 const toggleColorPicker = () => {
@@ -90,10 +115,11 @@ if(myRef && !myRef.contains(e.target)) {
     <div>
     {formComponent && 
     <div>
-     <div className="flex justify-end items-center">
-     <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>
+     <div className="flex justify-between items-center">
+      <p className="text-xs text-red-400">{message}</p> 
+       {loader? loader : <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>}
    </div>
- <form>
+ <form onSubmit ={handleSubmit}>
  <div className="flex justify-around items-center">
    <div className="relative z-0 w-full mb-6 group">
        <input type="text" name="type" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder="🖊️ ...Your source of income" required 
@@ -139,6 +165,7 @@ if(myRef && !myRef.contains(e.target)) {
  <DatePicker
  name = "date"
  placeholderText={'Please select a date'} 
+ autoComplete = "off"
  selected={formData.date}
  onChange={date => setFormData({...formData, date: date})}
  dateFormat = "yyyy/MM/dd"
@@ -152,9 +179,8 @@ if(myRef && !myRef.contains(e.target)) {
  </form>
  </div>
     }
-    {message}
     </div>
   )
 }
 
-export default CrudIncome
+export default CreateIncome

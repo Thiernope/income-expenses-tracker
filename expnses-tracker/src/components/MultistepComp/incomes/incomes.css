@@ -5,7 +5,7 @@
 	margin-left: auto;
 }
 .header {
-	background-color: rgb(17, 235, 151);
+	background-color: #f3faf7;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;

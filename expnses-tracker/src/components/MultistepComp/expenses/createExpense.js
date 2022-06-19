@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import {ColorLens, DateRange, Close} from "@material-ui/icons/";
+import PulseLoader from "react-spinners/PulseLoader"
 import DatePicker from "react-datepicker"
 import { useSelector } from "react-redux"
 import Error from "../../notifications/Error"
-import Success from "../../notifications/Success"
 import "react-datepicker/dist/react-datepicker.css"
 import {IconButton} from "@material-ui/core"
 import {SliderPicker } from "react-color"
@@ -13,16 +13,35 @@ const token = user.token;
 const [showDatePicker, setShowDatePicker] = useState(false);
 const [message, setMessage] = useState(null);
 const [colorPicker, setColorPicker ] = useState(false);
+const [loader, setLoader ] = useState(null)
 const [formData, setFormData ] = useState({
   type: "",
   color: "#EC7063",
   date: null
 })
 
-const createExpUrl = "https://money-tracking-app-20.herokuapp.com/expenses/"
+const createExpUrl = "https://money-tracking-app-20.herokuapp.com/expenses/";
 const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if(formData.type === "") {
+    setMessage("Please, type the name")
+    return setTimeout(()=>{
+      setMessage("");
+    }, 2000)
+  } else if(formData.color === "") {
+    setMessage("Plase, select the color") 
+    return setTimeout(()=>{
+      setMessage("");
+    }, 2000)
+  } else if(formData.date === null) {
+    setMessage("Please Select a date")
+    return setTimeout(()=>{
+      setMessage("");
+    }, 2000)
+  }
 try {
+  setLoader(<PulseLoader size={5}/>)
   const res = await fetch(createExpUrl , {
     method: 'POST',
     headers: {
@@ -32,7 +51,9 @@ try {
     body: JSON.stringify(formData)
   })
   const data = await res.json();
+  console.log("DDDsata", data)
   if(data.message === "Created Successfully") {
+    setLoader(null)
     //setMessage(<Success success = { data.message}/>)
     const createdExpense = data.createdExpense;
     setExpenseList([createdExpense, ...expenseList])
@@ -46,8 +67,9 @@ try {
     setTimeout(()=>{
       return setMessage(null)
     }, 1000);
-  } else if(data.message === "The type of income already exsit") {
-    setMessage(<Error error = {data.message}/>)
+  } else if(data.message === "The type of expense already exist") {
+    setLoader(null)
+    setMessage(<Error/>)
     hideForm();
     setFormData({
       type: "",
@@ -63,7 +85,6 @@ try {
   
 }
 }
-console.log(formData)
 const toggleColorPicker = () => {
     setColorPicker(!colorPicker)
 }
@@ -93,8 +114,9 @@ if(myRef && !myRef.contains(e.target)) {
     <div>
     {formComponent && 
     <div>
-     <div className="flex justify-end items-center">
-     <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>
+     <div className="flex justify-between items-center">
+     <p className="text-xs text-red-400">{message}</p> 
+      {loader? loader : <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>}
    </div>
  <form>
  <div className="flex justify-around items-center">
@@ -140,6 +162,7 @@ if(myRef && !myRef.contains(e.target)) {
  <DatePicker
  name = "date"
  placeholderText={'Please select a date'} 
+ autoComplete = "off"
  selected={formData.date}
  onChange={date => setFormData({...formData, date: date})}
  dateFormat = "yyyy/MM/dd"
@@ -153,7 +176,6 @@ if(myRef && !myRef.contains(e.target)) {
  </form>
  </div>
     }
-    {message}
     </div>
   )
 }

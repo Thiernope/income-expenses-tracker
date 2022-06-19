@@ -18,7 +18,4 @@ export default makeStyles((theme) => ({
   buttons: {
     marginRight: "5px"
   },
-  item: {
-    borderLeft: '2px solid rgb(241, 88, 96)',
-  }
 }));

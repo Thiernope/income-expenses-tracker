@@ -1,5 +1,4 @@
 import React, {useState, useRef} from 'react'
-import { PulseLoader } from "react-spinners"
 import CreateExpense from "./createExpense";
 import EditableExpense from './singleExpense/EditableExpense';
 import {Delete, Add } from "@material-ui/icons/";
@@ -8,7 +7,7 @@ import empty from "../../../assets/empty.json"
 import ReadOnlyExpense from './singleExpense/ReadOnlyExpense'
 import {IconButton} from "@material-ui/core"
 import "./expenses.css"
-const Expenses = ({handlePrev, isLoading, expenseFetchError, expenseList, setExpenseList, expenseId, setExpenseId}) => {
+const Expenses = ({handlePrev, expenseList, setExpenseList, expenseId, setExpenseId}) => {
 const [formComponent, setFormComponent] = useState(false);
 const showForm = () => {
   setFormComponent(true)
