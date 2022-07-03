@@ -1,7 +1,7 @@
 import React, {useState, useRef} from 'react'
 import CreateExpense from "./createExpense";
 import EditableExpense from './singleExpense/EditableExpense';
-import {Delete, Add } from "@material-ui/icons/";
+import {Add } from "@material-ui/icons/";
 import Lottie from "react-lottie"
 import empty from "../../../assets/empty.json"
 import ReadOnlyExpense from './singleExpense/ReadOnlyExpense'
@@ -24,11 +24,6 @@ const showExpenseToEdit = (id) => {
   
   const cancelEdit = () => {
     setExpenseId("")
-  }
-
-  const inputRef = useRef();
-  const toggleInputFocus = () => {
-   inputRef.current.focus();
   }
 
 const editInputRef = useRef();
@@ -54,7 +49,7 @@ const toggleEditInputRef = () => {
          </IconButton> */}
         </div>
 
-        <CreateExpense formComponent={formComponent} hideForm ={hideForm} inputRef ={inputRef} expenseList={expenseList} setExpenseList={setExpenseList}/>
+        <CreateExpense formComponent={formComponent} hideForm ={hideForm}  expenseList={expenseList} setExpenseList={setExpenseList}/>
      
     {
      expenseList.length >= 1? 

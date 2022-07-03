@@ -53,166 +53,132 @@ const allIncomesUrl = "https://money-tracking-app-20.herokuapp.com/incomes/";
 const allExpensesUrl = "https://money-tracking-app-20.herokuapp.com/expenses";
 
 useEffect(()=>{
- const getExpenses = async () => {
-   try {
-    dispatch(ExpenseFetchPending());
-    const expenseFromServer = await fetchAllExpenses();
-    if(expenseFromServer.error) {
-      setExpenseFetchError(expenseFromServer.error)
-      dispatch(ExpenseFetchFailure(expenseFromServer.error))
-    }  else if(expenseFromServer.length >= 0) {
-      setExpenseList(expenseFromServer)
-    dispatch(ExpenseFetchSuccess(expenseFromServer));
+  const fetchAllExpenses = async ()=>{
+    try {
+      dispatch(ExpenseFetchPending());
+        const res = await fetch(allExpensesUrl,{
+          headers: {
+            'Content-Type': 'application/json',
+            'token': 'Bearer ' + token
+          },
+        });
+        const expenseFromServer = await res.json();
+        if(expenseFromServer.error) {
+          setExpenseFetchError(expenseFromServer.error)
+          dispatch(ExpenseFetchFailure(expenseFromServer.error))
+        }  else if(expenseFromServer.length >= 0) {
+          setExpenseList(expenseFromServer)
+        dispatch(ExpenseFetchSuccess(expenseFromServer));
+        }
+    } catch (error) {
+        console.log(error)
     }
-   } catch (error) {
-     console.log(error)
-   }
- }
- getExpenses();
- },[])
+    
+    }
+    fetchAllExpenses();
+ },[dispatch, token])
 
- const fetchAllExpenses = async ()=>{
-  try {
-      const res = await fetch(allExpensesUrl,{
-        headers: {
-          'Content-Type': 'application/json',
-          'token': 'Bearer ' + token
-        },
-      });
-      const data = await res.json();
-      return data;
-  } catch (error) {
-      console.log(error)
-  }
-  
-  }
-  
+ 
 
  useEffect(()=>{
+  const fetchAllIncomes = async ()=>{
+    try {
       dispatch(IncomeFetchPending());
-      setUpdateLoader(<PulseLoader size={5}/>)
-    const getIncomes = async () => {
-      try {
-        const getIncomesFromServer = await fetchAllIncomes();
+        setUpdateLoader(<PulseLoader size={5}/>)
+        const response = await fetch(allIncomesUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'token': 'Bearer ' + token
+          },
+        });
+        const getIncomesFromServer= await response.json();
         if(getIncomesFromServer.error) {
           setUpdateLoader(null)
         settIncomesFetchError(getIncomesFromServer.error)
         dispatch(IncomeFetchFailure(getIncomesFromServer.error))
         } 
-
+  
         else if(getIncomesFromServer.length >= 0) {
           setUpdateLoader(null)
           setIncomeList(getIncomesFromServer)
           dispatch(IncomeFetchSuccess(getIncomesFromServer))
         }
-      } catch (error) {
+      
+    } catch (error) {
         console.log(error)
-      }
     }
-
-    getIncomes();
- },[])
-
- const fetchAllIncomes = async ()=>{
-  try {
-      const response = await fetch(allIncomesUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': 'Bearer ' + token
-        },
-      });
-      const result = await response.json();
-      return result;
     
-  } catch (error) {
-      console.log(error)
-  }
-  
-  }
-
-  useEffect(()=>{
-    const getTransactions = async () => {
-        dispatch(transactionPending())
-        setUpdateLoader(<PulseLoader size={5}/>)
-     try {
-         const transactions = await fetchTransctions();
-         if(transactions.length >= 1) {
-          setUpdateLoader(null)
-             setTransactionList(transactions)
-             dispatch(transactionSuccess(transactions))
-         } 
-
-         if(transactions.error) {
-          setUpdateLoader(null)
-             dispatch(transactionFailure(transactions.error))
-         }
-         
-     } catch (error) {
-         console.log(error)
-     }
     }
-    getTransactions()
-},[])
+    fetchAllIncomes()
+
+ },[dispatch, token])
+
+
 
   const transanctionUrl = 'https://money-tracking-app-20.herokuapp.com/transactions'
-    const fetchTransctions = async () => {
-        try {
-            const res = await fetch(transanctionUrl, {
-                method: 'GET',
-                headers: {
-                    'token': 'Bearer ' + token
-                }
-            })
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            console.log(error)
+  useEffect(()=>{
+        const fetchTransctions = async () => {
+          dispatch(transactionPending())
+          setUpdateLoader(<PulseLoader size={5}/>)
+          try {
+              const res = await fetch(transanctionUrl, {
+                  method: 'GET',
+                  headers: {
+                      'token': 'Bearer ' + token
+                  }
+              })
+              const transactions = await res.json();
+              if(transactions.length >= 1) {
+                setUpdateLoader(null)
+                   setTransactionList(transactions)
+                   dispatch(transactionSuccess(transactions))
+               } 
+      
+               if(transactions.error) {
+                setUpdateLoader(null)
+                   dispatch(transactionFailure(transactions.error))
+               }
+            
+          } catch (error) {
+              console.log(error)
+          }
         }
-    }
+
+        fetchTransctions();
+},[dispatch, token])
+   
 
 
     //userProfile 
-
+    const userProfileUrl = "https://money-tracking-app-20.herokuapp.com/user/user-profile"
     useEffect(()=>{
-      const getUserProfile = async() => {
-       dispatch(userPending())
+      const fetchUserProfile = async() => {
+        dispatch(userPending())
         try {
-         const userProfile = await fetchUserProfile();
-         if(userProfile) {
-           console.log("PROF", userProfile)
+          const res = await fetch(userProfileUrl, {
+            headers: {
+              'token': 'Bearer ' + token
+            }
+          })
+     
+          const userProfile = await res.json();
+          if(userProfile) {
            dispatch(userSuccess(userProfile))
            setUserProfileInfo(userProfile)
            setStart(userProfile.finishedTour);
          }
+   
         } catch (error) {
-          console.log(error)
-          dispatch(userFailure(error))
+         console.log(error)
+         dispatch(userFailure(error))
         }
-      }
-    
-      getUserProfile();
-    },[])
-    
+        }
+      fetchUserProfile();
+    },[dispatch, token])
     
     
-    const userProfileUrl = "https://money-tracking-app-20.herokuapp.com/user/user-profile"
-    
-       const fetchUserProfile = async() => {
-       try {
-         const res = await fetch(userProfileUrl, {
-           headers: {
-             'token': 'Bearer ' + token
-           }
-         })
-    
-         const data = await res.json();
-         return data;
-       } catch (error) {
-         
-       }
-       }
-
+     
    //Finish Tour
 
        const finishTourUrl = "https://money-tracking-app-20.herokuapp.com/user/finish-tour"

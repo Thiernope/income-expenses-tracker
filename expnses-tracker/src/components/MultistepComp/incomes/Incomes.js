@@ -4,7 +4,7 @@ import {IconButton} from "@material-ui/core"
 import Lottie from "react-lottie"
 import { FaRobot } from "react-icons/fa"
 import empty from "../../../assets/empty.json"
-import {Delete, Add } from "@material-ui/icons/";
+import { Add } from "@material-ui/icons/";
 import ReadOnlyIncome from './singleIncome/ReadOnlyIncome'
 import EditableIncome from "./singleIncome/EditableIncome"
 import "./incomes.css"
@@ -43,11 +43,6 @@ const cancelEdit = () => {
 
 
 
-const inputRef = useRef();
-const toggleInputFocus = () => {
-  inputRef.current.focus();
-}
-
 const editInputRef = useRef();
 const toggleEditInputRef = () => {
   editInputRef.current.focus();
@@ -70,7 +65,7 @@ const toggleEditInputRef = () => {
          <Delete />
          </IconButton> */}
         </div>
-        <CrudIncome formComponent={formComponent} hideForm ={hideForm} inputRef={inputRef} setIncomeList={setIncomeList} incomeList={incomeList}/>
+        <CrudIncome formComponent={formComponent} hideForm ={hideForm}  setIncomeList={setIncomeList} incomeList={incomeList}/>
      
        {incomeList.length >= 1? 
       <div className="h-full overflow-scroll">

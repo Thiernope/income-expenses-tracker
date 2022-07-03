@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
 import {resetLink } from "../../api/userApi"
-import { Link } from "react-router-dom"
 const EmailVerification = () => {
     const [successMessage, setSuccessMessage ] = useState("")
     const [errorMessage, setErrorMessage] = useState("")

@@ -19,13 +19,9 @@ const [inputValue, setInputValue] = useState("")
 const [loader, setLoader] = useState("")
 const [imageUrl, setImageUrl ] = useState(null)
 const [saveBtn, setSaveBtn ] = useState(false)
-const [selectBtn, setSelectBtn ] = useState(false)
 const [uploadLoader, setUploadLoader] = useState(null)
 
 
-const showSelectBtn = () => {
-  setSelectBtn(true)
-}
 
 
 const showOrHidSettings = () => {
@@ -103,7 +99,6 @@ const onSelectedFiles = async (e) => {
   data.append('file', files[0])
   data.append('upload_preset', process.env.REACT_APP_UPLOAD_PRESET)
 try {
-  setSelectBtn(false)
   setUploadLoader(<PulseLoader size={5}/>)
   const res = await fetch(url, {
     method: 'POST',
@@ -184,7 +179,7 @@ default: return<DoughnutView transactionList={transactionList}/>
 
          <section className="rounded flex justify-center items-center">
                 <label>
-                <div className="cursor-pointer relative" onClick={showSelectBtn}>
+                <div className="cursor-pointer relative">
              {userProfileInfo.profilePicture === ""? 
              <div className="relative w-48 h-48 bg-green-200 rounded-full flex justify-center items-center">
              <h1 className="text-xl">{user.firstName[0] + user.lastName[0]}</h1>

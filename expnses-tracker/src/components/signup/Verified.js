@@ -8,32 +8,24 @@ const Verified = () => {
 const [message, setMessage] = useState("Loading...")
 const {id, token } = useParams();
 const verifyUrl = `https://money-tracking-app-20.herokuapp.com/user/${id}/verify/${token}`
-const verify = async () => {
-try {
-    const response = await fetch(verifyUrl, {
-        method: 'GET', 
-      })
-      const data = await response.json();
-      return data;
-} catch (error) {
-    console.log(error)
-}
-}
+
+
 
 useEffect(()=>{
+  const verify = async () => {
     try {
-        const fetchData = async () =>{
-            const info = await verify();
-            setMessage(info.message);
-            console.log(info); 
-        }
-
-        fetchData();
+        const response = await fetch(verifyUrl, {
+            method: 'GET', 
+          })
+          const data = await response.json();
+          setMessage(data.message);
+              console.log(data); 
     } catch (error) {
         console.log(error)
     }
-},[])
-
+    }
+    verify();
+},[verifyUrl])
 
 const defaultOptions = {
     loop: true,
