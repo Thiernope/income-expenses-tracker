@@ -4,6 +4,9 @@
 	height: 30px;
 	margin-left: auto;
 }
+.lists {
+	max-height: 600px;
+}
 .header {
 	background-color: #f3faf7;
 	display: flex;

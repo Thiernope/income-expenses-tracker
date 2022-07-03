@@ -1,14 +1,20 @@
-import React, {useState} from 'react'
-import { FcGoogle } from 'react-icons/fc'
+import React, {useState, useEffect} from 'react'
+import {RiFacebookFill} from "react-icons/ri"
+import { PulseLoader } from 'react-spinners'
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
 import "./login.css"
 import { userLogin } from "../../api/userApi"
+import GoogleLogin from 'react-google-login';
 import {Link} from "react-router-dom"
+import {gapi} from "gapi-script"
+import axios from "axios"
 import {useNavigate} from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux";
 import { LoginUserPending, LoginUserSuccess, LoginUserFailure } from './loginSlice';
 const Login = () => {
   const [message, setMessage ] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+
   const {isLoading } = useSelector(state=> state.loginUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,10 +50,65 @@ const Login = () => {
     }
   }
 
+
+  useEffect(()=>{
+    function start() {
+      gapi.client.init({
+        clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        scope: ""
+      })
+    }
+    
+    gapi.load('client:auth2', start)
+    },[])
+    
+    
+        const responseGoogleSuccess = (response) => {
+          dispatch(LoginUserPending());
+            axios({
+            method: 'POST',
+            url : 'https://money-tracking-app-20.herokuapp.com/user/google-login',
+            data: {tokenId: response.tokenId}
+          }).then( response => {
+            if(response.data) {
+              dispatch(LoginUserSuccess(response.data))
+                return navigate("/dashboard")
+            }
+          }).catch(error => {
+            console.log(error)
+            dispatch( LoginUserFailure(error));
+          })
+        }
+    
+        const responseGoogleFailure = (response) => {
+          console.log("RES", response)
+        }
+
+
+        //login with facebook
+    
+        const responseFacebook = (response) => {
+          axios({
+            method: 'POST',
+            url : 'https://money-tracking-app-20.herokuapp.com/user/facebook-login',
+            data: {accessToken: response.accessToken, userID: response.userID}
+          }).then( response => {
+            if(response.data) {
+              dispatch(LoginUserSuccess(response.data))
+                return navigate("/dashboard")
+            }
+            
+          }).catch(error => {
+            console.log(error)
+            dispatch( LoginUserFailure(error));
+          })
+        }
+
+
   return (
-      <div className="p-3 flex flex-col justify-center items-center h-screen">
+      <div style={{backgroundImage: `url("https://res.cloudinary.com/dev-ltd/image/upload/v1656756117/mqzehpcg5fic92fuqyza.png")`, height: "700px", width: "100%", maxWidth: "1200px", margin: "0 auto"}} className="p-3 flex flex-col justify-center items-center">
         <div>
-      {isLoading && <p>loading...</p>}
+      {isLoading && <p><PulseLoader size={5}/></p>}
       <div style={{color: "red"}}>
        {errorMessage? 
        <div id="toast-warning" className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
@@ -104,17 +165,28 @@ const Login = () => {
   <label htmlFor="terms" className="text-xs font-medium text-gray-900 dark:text-gray-300">Don't have an account? <Link to="/signup" className="text-blue-600 hover:underline dark:text-blue-500">sign Up</Link></label>
   </div>
   </div>
-  <div className="mt-5 flex justify-between items-center">
-  <button type="button" className="text-white bg-[#3b5998] hover:bg-[#3b5998]/90 focus:ring-4 focus:outline-none focus:ring-[#3b5998]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#3b5998]/55 mr-2 mb-2">
-  <svg className="w-4 h-4 mr-2 -ml-1" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="facebook-f" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M279.1 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.4 0 225.4 0c-73.22 0-121.1 44.38-121.1 124.7v70.62H22.89V288h81.39v224h100.2V288z"></path></svg>
-   Facebook
-</button>
-<button type="button" className="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 mr-2 mb-2">
- <FcGoogle className="w-4 h-4 mr-2 -ml-1"/>
-  Google
-</button>
-</div>
 </form>
+  <div className="mt-5 flex justify-between items-center">
+    <div className="w-1/3">
+  <FacebookLogin
+    appId= {process.env.REACT_APP_FACEBOOK_APP_ID} 
+    autoLoad={false}
+    fields="name,email,picture"
+    callback={responseFacebook} 
+    render={renderProps => (
+      <button onClick={renderProps.onClick} className="bg-blue-700 text-white flex justify-center items-center text-sm p-3 border rounded"> <RiFacebookFill className="text-white mr-3" />Facebook</button>
+    )}
+    />
+  
+   </div>
+  <GoogleLogin
+    clientId= {process.env.REACT_APP_GOOGLE_CLIENT_ID} 
+    buttonText="Use Google"
+    onSuccess={responseGoogleSuccess}
+    onFailure={responseGoogleFailure}
+    cookiePolicy={'single_host_origin'}
+  />
+</div>
 </div>
     </div>
   )

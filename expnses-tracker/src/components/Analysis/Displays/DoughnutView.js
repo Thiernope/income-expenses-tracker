@@ -1,5 +1,7 @@
 import React from 'react'
 import { Doughnut } from "react-chartjs-2";
+import empty from "../../../assets/empty.json"
+import Lottie from "react-lottie"
 import Chart from 'chart.js/auto'
 Chart.register();
 
@@ -75,7 +77,14 @@ const DoughnutView = ({transactionList, selectDoughnut, selectLine, selectPolar}
           },
     
       }
-    
+      const defaultOptions = {
+        loop: true,
+        autoplay: true, 
+        animationData: empty,
+        rendererSettings: {
+          preserveAspectRatio: 'xMidYMid slice'
+        }
+      };
   return (
     <div>
     <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
@@ -91,14 +100,24 @@ const DoughnutView = ({transactionList, selectDoughnut, selectLine, selectPolar}
         </li>
     </ul>
 </div>
-    <div className="overflow-auto flex justify-center items-center flex-wrap">
-      <div className="relative h-80 flex-1">
-      <Doughnut data = {DoughnutInc} options = {DoughnutChartOptions}/>
+ {transactionList.length >=1 ? 
+ <div className="overflow-auto flex justify-center items-center flex-wrap">
+ <div className="relative h-80 flex-1">
+ <Doughnut data = {DoughnutInc} options = {DoughnutChartOptions}/>
+ </div>
+ <div className="relative h-80 flex-1">
+ <Doughnut data = {DoughnutExp} options = {DoughnutChartOptions}/>
+ </div>
+</div>: 
+<div className="flex flex-col justify-center items-center h-48">
+
+        <Lottie options={defaultOptions}
+          className="lottie"
+          height={200}
+          width={200}
+        />
       </div>
-      <div className="relative h-80 flex-1">
-      <Doughnut data = {DoughnutExp} options = {DoughnutChartOptions}/>
-      </div>
-    </div>
+}
     </div>
   )
 }

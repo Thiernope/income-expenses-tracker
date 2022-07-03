@@ -1,11 +1,17 @@
-import React, { useState }from 'react'
-import { FcGoogle } from 'react-icons/fc'
+import React, { useEffect, useState }from 'react'
+import {RiFacebookFill} from "react-icons/ri"
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
+import GoogleLogin from 'react-google-login';
+import axios from "axios"
 import "./signup.css"
 import {Link} from "react-router-dom"
 import { userRegister } from '../../api/userApi';
 import { useNavigate } from "react-router-dom"
 import { signupPending, signupSuccess, signupError } from './signUpSlice';
 import { useDispatch, useSelector } from "react-redux";
+import { LoginUserPending, LoginUserSuccess, LoginUserFailure } from '../login/loginSlice';
+import {gapi} from "gapi-script"
+import { PulseLoader } from 'react-spinners';
 const Signup = () => {
 const navigate = useNavigate();
 const dispatch = useDispatch();
@@ -45,11 +51,63 @@ password: "",
 
     }
 
+ useEffect(()=>{
+function start() {
+  gapi.client.init({
+    clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+    scope: ""
+  })
+}
 
+gapi.load('client:auth2', start)
+},[])
+
+
+    const responseGoogleSuccess = (response) => {
+      dispatch(LoginUserPending());
+        axios({
+        method: 'POST',
+        url : 'https://money-tracking-app-20.herokuapp.com/user/google-login',
+        data: {tokenId: response.tokenId}
+      }).then( response => {
+        console.log("G_L_S", response.data);
+        if(response) {
+          dispatch(LoginUserSuccess(response.data))
+          navigate("/dashboard")
+        }
+      }).catch(error => {
+        dispatch(LoginUserFailure(error));
+      })
+    }
+
+    const responseGoogleFailure = (response) => {
+      console.log("RES", response)
+    }
+
+
+
+    //Login with Facebook
+
+    const responseFacebook = (response) => {
+      axios({
+        method: 'POST',
+        url : 'https://money-tracking-app-20.herokuapp.com/user/facebook-login',
+        data: {accessToken: response.accessToken, userID: response.userID}
+      }).then( response => {
+        if(response.data) {
+          dispatch(LoginUserSuccess(response.data))
+            return navigate("/dashboard")
+        }
+        
+      }).catch(error => {
+        console.log(error)
+        dispatch( LoginUserFailure(error));
+      })
+    }
   return (
-    <div className="p-3 flex flex-col justify-center items-center h-screen">
+    <div style={{backgroundImage: `url("https://res.cloudinary.com/dev-ltd/image/upload/v1656756117/mqzehpcg5fic92fuqyza.png")`,height: "700px", width: "100%", maxWidth: "1200px", margin: "0 auto"}}  className="p-3 flex flex-col justify-center items-center">
         <div>
-        {isLoading && <p className="loading">Loading...</p>}
+        {isLoading && <p className="loading"><PulseLoader size={5}/></p>}
         {error && 
         <div id="toast-warning" class="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
         <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-orange-500 bg-orange-100 rounded-lg dark:bg-orange-700 dark:text-orange-200">
@@ -98,17 +156,28 @@ password: "",
 }
   <label for="terms" className="text-xs font-medium text-gray-900 dark:text-gray-300">Have an account? <Link to="/login" class="text-blue-600 hover:underline dark:text-blue-500">sign in</Link></label>
   </div>
-<div className="mt-5 flex justify-between items-center">
-  <button type="button" class="text-white bg-[#3b5998] hover:bg-[#3b5998]/90 focus:ring-4 focus:outline-none focus:ring-[#3b5998]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#3b5998]/55 mr-2 mb-2">
-  <svg class="w-4 h-4 mr-2 -ml-1" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="facebook-f" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M279.1 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.4 0 225.4 0c-73.22 0-121.1 44.38-121.1 124.7v70.62H22.89V288h81.39v224h100.2V288z"></path></svg>
-   Facebook
-</button>
-<button type="button" class="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 mr-2 mb-2">
- <FcGoogle className="w-4 h-4 mr-2 -ml-1"/>
-  Google
-</button>
-</div>
 </form>
+<div className="mt-5 flex justify-between items-center">
+    <div className="w-1/3">
+  <FacebookLogin
+    appId= {process.env.REACT_APP_FACEBOOK_APP_ID} 
+    autoLoad={false}
+    fields="name,email,picture"
+    callback={responseFacebook} 
+    render={renderProps => (
+      <button onClick={renderProps.onClick} className="bg-blue-700 text-white flex justify-center items-center text-sm p-3 border rounded"> <RiFacebookFill className="text-white mr-3" />Facebook</button>
+    )}
+    />
+  
+   </div>
+  <GoogleLogin
+    clientId= {process.env.REACT_APP_GOOGLE_CLIENT_ID} 
+    buttonText="Use Google"
+    onSuccess={responseGoogleSuccess}
+    onFailure={responseGoogleFailure}
+    cookiePolicy={'single_host_origin'}
+  />
+</div>
 </div>
     </div>
   )

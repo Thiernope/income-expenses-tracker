@@ -7,7 +7,7 @@ import empty from "../../../assets/empty.json"
 import ReadOnlyExpense from './singleExpense/ReadOnlyExpense'
 import {IconButton} from "@material-ui/core"
 import "./expenses.css"
-const Expenses = ({handlePrev, expenseList, setExpenseList, expenseId, setExpenseId}) => {
+const Expenses = ({handlePrev, expenseList, setExpenseList, expenseId, setExpenseId, updateLoader}) => {
 const [formComponent, setFormComponent] = useState(false);
 const showForm = () => {
   setFormComponent(true)
@@ -46,19 +46,19 @@ const toggleEditInputRef = () => {
   };
   return (
    
-   <div style={{height: "calc(100vh - 4rem)", position: "relative", overflow: "scroll", display: "flex", flexDirection: "column"}}>
+   <div style={{height: "100%", position: "relative", overflow: "scroll", display: "flex", flexDirection: "column"}}>
       <div className="headerExp">
-        <h2 className="title">Potential expenses</h2>
-        <IconButton edge ="end" area-label ="delete" style={{marginRight: "10px"}}>
+        <h2 className="title p-4">Potential expenses</h2>
+        {/* <IconButton edge ="end" area-label ="delete" style={{marginRight: "10px"}}>
          <Delete />
-         </IconButton>
+         </IconButton> */}
         </div>
 
         <CreateExpense formComponent={formComponent} hideForm ={hideForm} inputRef ={inputRef} expenseList={expenseList} setExpenseList={setExpenseList}/>
      
     {
      expenseList.length >= 1? 
-     <div className="h-full">
+     <div className="h-full overflow-scroll">
       {expenseList.map((expense) => (
         <div key={expense._id}>
         {expenseId === expense._id ? 
@@ -67,14 +67,14 @@ const toggleEditInputRef = () => {
       } 
       </div>
       ))}
-      </div>:
+      </div>: updateLoader != null? <div className="flex justify-center items-center h-screen"> {updateLoader}</div>:
       <div className="empty">
        <h1>No expenses list</h1>
        
         <Lottie options={defaultOptions}
           className="lottie"
-          height={150}
-          width={150}
+          height={100}
+          width={100}
         />
       </div>
       }

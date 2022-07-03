@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {BsFillLockFill} from "react-icons/bs"
+import {PulseLoader} from "react-spinners"
 import { useSelector, useDispatch} from "react-redux"
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Tabs from "./components/Transactions/Create/Tabs"
 import ChartDisplay from "./components/Analysis/ChartDisplay"
 import Split from "react-split"
@@ -12,8 +13,8 @@ import { ExpenseFetchPending, ExpenseFetchFailure, ExpenseFetchSuccess } from '.
 import { IncomeFetchPending, IncomeFetchFailure, IncomeFetchSuccess } from './components/MultistepComp/incomes/IncomeSlice'
 import {transactionPending,transactionSuccess, transactionFailure} from "./components/Transactions/Create/transactionSlice"
 import {userPending,userSuccess, userFailure} from "./components/userProfile/UserSlice"
+
 const Dashboard = () => {
-const navigate = useNavigate();
 const dispatch = useDispatch();
 const { user } = useSelector(state => state.loginUser);
 const token = user.token;
@@ -25,10 +26,26 @@ const [incomeId, setIncomeId ] = useState(null)
 const [incomesFetchError, settIncomesFetchError] = useState(null)
 const [transactionList, setTransactionList] = useState([])
 const [balanceModal, setBalanceModal] = useState(false);
-const [profile, setProfile ] = useState(false)
+const [profile, setProfile ] = useState(false);
+const [userProfileInfo, setUserProfileInfo] = useState({});
+const [close, setClose] = useState(false)
+const [imageProf, setImageProf] = useState(true)
+
+//tour states
+
+const [start, setStart ] = useState(null);
+const [switchIndicator, setSwitchIndicator] = useState(false)
+const [createIndicator, setCreateIndicator] = useState(false)
+const [dipositIndicator, setDipositIndicator] = useState(false)
+const [withdrawIndicator, setWithdrawIndicator] = useState(false)
+const [balanceIndicator, setBalanceIndicator] = useState(false)
+const [updateLoader, setUpdateLoader ] = useState(null)
 const toggleProfile = () => {
   setProfile(!profile)
+  setClose(!close)
+  setImageProf(!imageProf)
 }
+
 const showBalanceModal = () => {
   setBalanceModal(!balanceModal)
 }
@@ -73,15 +90,18 @@ useEffect(()=>{
 
  useEffect(()=>{
       dispatch(IncomeFetchPending());
+      setUpdateLoader(<PulseLoader size={5}/>)
     const getIncomes = async () => {
       try {
         const getIncomesFromServer = await fetchAllIncomes();
         if(getIncomesFromServer.error) {
+          setUpdateLoader(null)
         settIncomesFetchError(getIncomesFromServer.error)
         dispatch(IncomeFetchFailure(getIncomesFromServer.error))
         } 
 
         else if(getIncomesFromServer.length >= 0) {
+          setUpdateLoader(null)
           setIncomeList(getIncomesFromServer)
           dispatch(IncomeFetchSuccess(getIncomesFromServer))
         }
@@ -114,14 +134,17 @@ useEffect(()=>{
   useEffect(()=>{
     const getTransactions = async () => {
         dispatch(transactionPending())
+        setUpdateLoader(<PulseLoader size={5}/>)
      try {
          const transactions = await fetchTransctions();
          if(transactions.length >= 1) {
+          setUpdateLoader(null)
              setTransactionList(transactions)
              dispatch(transactionSuccess(transactions))
          } 
 
          if(transactions.error) {
+          setUpdateLoader(null)
              dispatch(transactionFailure(transactions.error))
          }
          
@@ -148,42 +171,160 @@ useEffect(()=>{
         }
     }
 
-     useEffect(()=>{
-       const getUserProfile = async() => {
-        dispatch(userPending())
-         try {
-          const userProfile = await fetchUserProfile();
-          console.log("User", userProfile)
-          if(userProfile) {
-            dispatch(userSuccess(userProfile))
-          }
-         } catch (error) {
-           console.log(error)
-           dispatch(userFailure(error))
+
+    //userProfile 
+
+    useEffect(()=>{
+      const getUserProfile = async() => {
+       dispatch(userPending())
+        try {
+         const userProfile = await fetchUserProfile();
+         if(userProfile) {
+           console.log("PROF", userProfile)
+           dispatch(userSuccess(userProfile))
+           setUserProfileInfo(userProfile)
+           setStart(userProfile.finishedTour);
          }
+        } catch (error) {
+          console.log(error)
+          dispatch(userFailure(error))
+        }
+      }
+    
+      getUserProfile();
+    },[])
+    
+    
+    
+    const userProfileUrl = "https://money-tracking-app-20.herokuapp.com/user/user-profile"
+    
+       const fetchUserProfile = async() => {
+       try {
+         const res = await fetch(userProfileUrl, {
+           headers: {
+             'token': 'Bearer ' + token
+           }
+         })
+    
+         const data = await res.json();
+         return data;
+       } catch (error) {
+         
+       }
        }
 
-       getUserProfile();
-     }, [])
+   //Finish Tour
 
-
-
-    const userProfileUrl = "https://money-tracking-app-20.herokuapp.com/user/user-profile"
-
-        const fetchUserProfile = async() => {
+       const finishTourUrl = "https://money-tracking-app-20.herokuapp.com/user/finish-tour"
+       const finishTour = async () => {
+        setUpdateLoader(<PulseLoader size={5}/>)
         try {
-          const res = await fetch(userProfileUrl, {
+          const res = await fetch(finishTourUrl , {
+            method: 'PUT',
             headers: {
+              'Content-Type': 'application/json',
               'token': 'Bearer ' + token
             }
           })
-
+      
           const data = await res.json();
-          return data;
+          console.log("DAFLA", data)
+          if(data.message === "Finished tour") {
+            setUpdateLoader(null)
+            setStart(data.updatedUser.finishedTour)
+            setBalanceIndicator(false);
+          }
         } catch (error) {
-          
+          console.log(error)
         }
-        }
+      }
+      
+    
+//Tour functions::::::
+
+
+const showSwitch = () => {
+  setStart(!start);
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth',
+  })
+  setSwitchIndicator(true)
+}
+
+const hideSwitch = () => {
+  setSwitchIndicator(false)
+  window.scrollTo({
+  top: 0,
+  behavior: 'smooth',
+  });
+  setStart(false);
+}
+
+ const hideSwitchAndForward = () => {
+ showCreate();
+ window.scrollTo({
+  top: document.body.scrollHeight,
+  behavior: 'smooth',
+});
+ setSwitchIndicator(false)
+ }
+
+const showCreate = () => {
+  setCreateIndicator(true)
+}
+
+const hideCreate = () => {
+  setCreateIndicator(false)
+  setSwitchIndicator(true)
+}
+
+ const hideCreateAndForWard = () => {
+  setCreateIndicator(false);
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+  setDipositIndicator(true)
+ }
+
+ const showDeposit = () => {
+   setDipositIndicator(true)
+ }
+
+ const hideDeposit = () => {
+  setCreateIndicator(true)
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth',
+  });
+  setDipositIndicator(false)
+}
+
+const hideDepostAndForward = () => {
+  setDipositIndicator(false)
+  setWithdrawIndicator(true);
+}
+
+const showWithdraw = () => {
+  setWithdrawIndicator(true)
+}
+
+const hideWithdraw = () => {
+  setWithdrawIndicator(false)
+  setDipositIndicator(true)
+}
+
+const hideWidthdrawAndForward = () => {
+  setWithdrawIndicator(false)
+  setBalanceIndicator(true)
+}
+
+
+const hideBalance = () => {
+  setBalanceIndicator(false)
+  showWithdraw();
+}
 
   const logout = () => {
     localStorage.removeItem("persist:root");
@@ -192,31 +333,38 @@ useEffect(()=>{
 
     return (
       <div>
-        { Object.keys(user).length !== 0 ?
-        <div className="dashboard h-screen">
-           <Nav showBalanceModal= {showBalanceModal} toggleProfile ={toggleProfile}/>
-        <div className="lg:hidden">
-          <h1>for smartphones</h1>
-        </div>
-          <div className="hidden lg:block">
+        { Object.keys(user).length !== 0?
+        <div className="dashboard">
+           <Nav showBalanceModal= {showBalanceModal} toggleProfile ={toggleProfile} userProfileInfo={userProfileInfo} close={close} imageProf={imageProf}/>
+           
+           {/*MOBIL */ } 
+
+
+
+           {/*DESKTOP*/ } 
+
+          <div className="hidden sm:block">
           <Split 
           gutterSize={4}
           direction="vertical" 
           minSize={0}
-          sizes={[100, 0]}
-          style={{height:'100%'}}>
+          sizes={[100,0]}
+          style = {{height: "700px"}}
+          >
             <Split 
             gutterSize={4}
             direction="horizontal" 
             minSize={0}
             sizes={[30, 40, 30]}
             className="flex">
+              <div className="overflow-hidden">
               <IncomeExpeParent 
               expenseFetchError = {expenseFetchError}
               expenseList={expenseList} 
               setExpenseList={setExpenseList} 
               expenseId={expenseId} 
               setExpenseId={setExpenseId}
+              updateLoader ={updateLoader}
 
               incomesFetchError = {incomesFetchError}
               incomeList = {incomeList}
@@ -224,29 +372,40 @@ useEffect(()=>{
               incomeId = {incomeId}
               setIncomeId ={setIncomeId}
              
+              start = {start}
+              showSwitch ={showSwitch}
+
+              switchIndicator = {switchIndicator}
+              createIndicator = {createIndicator}
+              hideSwitch  = { hideSwitch }
+              showCreate = {showCreate }
+              showDeposit = {showDeposit}
+              hideSwitchAndForward = {hideSwitchAndForward}
+              hideCreateAndForWard = {hideCreateAndForWard}
+              hideCreate = {hideCreate}
               />
+              </div>
+              <div className="">
                <Split 
-               sizes={[50, 50]}
+               sizes={[50,50]}
                gutterSize={4}
-               minSize={0}
+               minSize={10}
                direction="vertical"
                >
-               <div>
-               <div>
-               <Tabs expenseList={expenseList} incomeList={incomeList} transactionList={transactionList} setTransactionList={setTransactionList} balanceModal={balanceModal}/> 
-               </div>
-               </div>
-                 <div>
-                   <div>
-                     <List transactionList={transactionList} setTransactionList={setTransactionList}/>
-                   </div>
-                 </div>
+               <Tabs expenseList={expenseList} incomeList={incomeList} transactionList={transactionList} setTransactionList={setTransactionList} balanceModal={balanceModal}
+               hideDepostAndForward = {hideDepostAndForward} finishTour = {finishTour } updateLoader ={updateLoader}
+               hideDeposit = {hideDeposit} dipositIndicator={dipositIndicator} balanceIndicator ={balanceIndicator} withdrawIndicator = {withdrawIndicator} hideWithdraw = {hideWithdraw } hideWidthdrawAndForward = {hideWidthdrawAndForward } hideBalance = {hideBalance } 
+               /> 
+                <List transactionList={transactionList} setTransactionList={setTransactionList} updateLoader ={updateLoader}/>
                </Split>
+               </div>
+
+
+
                <div className="">
-                 <ChartDisplay transactionList={transactionList} profile={profile} logout={logout} token={token}/>
+                 <ChartDisplay transactionList={transactionList} profile={profile} logout={logout} token={token} userProfileInfo = {userProfileInfo} setUserProfileInfo = { setUserProfileInfo}/>
                </div>
             </Split>
-            <div className=""></div>
           </Split>
       </div>
       </div>:
@@ -260,6 +419,11 @@ useEffect(()=>{
       </Link>
       </div>
       }
+      <div className="mt-5 flex flex-col justify-center items-center">
+        <p className="text-gray-400 text-xs">Powered by Thiernope</p>
+        <p className="text-gray-400 text-xs">copyright @Thiernope 2022</p>
+        </div>
+
        </div>
     )
 }

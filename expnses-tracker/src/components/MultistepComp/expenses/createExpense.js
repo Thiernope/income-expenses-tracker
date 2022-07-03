@@ -51,10 +51,8 @@ try {
     body: JSON.stringify(formData)
   })
   const data = await res.json();
-  console.log("DDDsata", data)
   if(data.message === "Created Successfully") {
     setLoader(null)
-    //setMessage(<Success success = { data.message}/>)
     const createdExpense = data.createdExpense;
     setExpenseList([createdExpense, ...expenseList])
     hideForm();
@@ -69,17 +67,17 @@ try {
     }, 1000);
   } else if(data.message === "The type of expense already exist") {
     setLoader(null)
-    setMessage(<Error/>)
-    hideForm();
-    setFormData({
-      type: "",
-      color: "#EC7063",
-      date: null
-    })
-
+    setMessage(<Error error = {data.message}/>)
     setTimeout(()=>{
-      return setMessage(null)
-    }, 4000);
+      hideForm();
+      setFormData({
+        type: "",
+        color: "#26DA77",
+        date: null
+      })
+
+      setMessage(null)
+    }, 3000);
   }
 } catch (error) {
   
@@ -115,7 +113,7 @@ if(myRef && !myRef.contains(e.target)) {
     {formComponent && 
     <div>
      <div className="flex justify-between items-center">
-     <p className="text-xs text-red-400">{message}</p> 
+      <div className="text-xm text-red-400">{message}</div>
       {loader? loader : <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>}
    </div>
  <form>

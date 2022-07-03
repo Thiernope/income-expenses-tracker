@@ -1,6 +1,8 @@
 import React from 'react'
 import { PolarArea } from "react-chartjs-2";
 import Chart from 'chart.js/auto'
+import empty from "../../../assets/empty.json"
+import Lottie from "react-lottie"
 Chart.register();
 const Polar = ({transactionList, selectDoughnut, selectLine, selectPolar}) => {
     const incomes = transactionList.filter(inc => inc.category === "Income");
@@ -72,7 +74,14 @@ const Polar = ({transactionList, selectDoughnut, selectLine, selectPolar}) => {
           },
     
       }
-    
+      const defaultOptions = {
+        loop: true,
+        autoplay: true, 
+        animationData: empty,
+        rendererSettings: {
+          preserveAspectRatio: 'xMidYMid slice'
+        }
+      };
   return (
       <div>
     <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
@@ -88,14 +97,24 @@ const Polar = ({transactionList, selectDoughnut, selectLine, selectPolar}) => {
         </li>
     </ul>
 </div>
-    <div className="overflow-auto flex justify-center items-center flex-wrap">
-      <div className="relative h-80 flex-1">
-      <PolarArea data = {polarInc} options = {polarChartOptions}/>
-      </div>
-      <div className="relative h-80 flex-1">
-      <PolarArea data = {polarExp} options = {polarChartOptions}/>
-      </div>
-    </div>
+{transactionList.length >=1 ? 
+ <div className="overflow-auto flex justify-center items-center flex-wrap">
+ <div className="relative h-80 flex-1">
+ <PolarArea data = {polarInc} options = {polarChartOptions}/>
+ </div>
+ <div className="relative h-80 flex-1">
+ <PolarArea data = {polarExp} options = {polarChartOptions}/>
+ </div>
+</div>:
+<div className="flex flex-col justify-center items-center h-48">
+
+<Lottie options={defaultOptions}
+  className="lottie"
+  height={200}
+  width={200}
+/>
+</div>
+}
     </div>
   )
 }

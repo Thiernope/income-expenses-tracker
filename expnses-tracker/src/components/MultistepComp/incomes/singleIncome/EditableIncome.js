@@ -44,7 +44,7 @@ const EditableIncome = ({editInputRef, cancelEdit, income, incomeList, setIncome
       const handleSubmit = async (id) => {
           try {
             const res = await fetch(`https://money-tracking-app-20.herokuapp.com/incomes/${id}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'token': 'Bearer ' + token

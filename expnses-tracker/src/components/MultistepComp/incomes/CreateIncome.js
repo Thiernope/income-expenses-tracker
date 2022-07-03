@@ -53,7 +53,6 @@ try {
     body: JSON.stringify(formData)
   })
   const data = await res.json();
-  console.log("DDKLSDf", data)
   if(data.message === "Created Successfully") {
     setLoader(null)
     const createdIncome = data.createdIncome;
@@ -67,19 +66,20 @@ try {
     setTimeout(()=>{
       return setMessage(null)
     }, 1000);
-  } else if(data.message === "The type of income already exsit") {
-    setLoader(<null/>)
-    setMessage(<Error error = {data.message}/>)
-    hideForm();
-    setFormData({
-      type: "",
-      color: "#26DA77",
-      date: null
-    })
-
+  } else if(data.message === "The type of income already exist") {
+    setLoader(null)
+    setMessage(<Error error = {data.message} />)
     setTimeout(()=>{
-      return setMessage(null)
-    }, 4000);
+      hideForm();
+      setFormData({
+        type: "",
+        color: "#26DA77",
+        date: null
+      })
+
+      setMessage(null)
+    }, 3000);
+    
   }
 } catch (error) {
   console.log(error)
@@ -116,7 +116,7 @@ if(myRef && !myRef.contains(e.target)) {
     {formComponent && 
     <div>
      <div className="flex justify-between items-center">
-      <p className="text-xs text-red-400">{message}</p> 
+     <div className="text-xm text-red-400">{message}</div>
        {loader? loader : <Close style={{fontSize: "15px", marginRight: "10px", cursor: "pointer"}} onClick={hideForm}/>}
    </div>
  <form onSubmit ={handleSubmit}>

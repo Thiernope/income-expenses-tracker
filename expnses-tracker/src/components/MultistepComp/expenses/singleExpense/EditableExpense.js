@@ -5,8 +5,9 @@ import { useSelector } from "react-redux"
 import useStyles from "./styles"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
+import { PulseLoader } from 'react-spinners'
 const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, expenseList}) => {
-    const [message, setMessage] = useState(null);
+    const [loader, setLoader] = useState(null);
     const { user } = useSelector(state => state.loginUser);
     const token = user.token;
     const [colorPicker, setColorPicker ] = useState(false);
@@ -42,8 +43,9 @@ const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, exp
     
     const handleSubmit = async (id) => {
         try {
+            setLoader(<PulseLoader size={5}/>)
           const res = await fetch(`https://money-tracking-app-20.herokuapp.com/expenses/${id}`, {
-              method: 'PATCH',
+              method: 'PUT',
               headers: {
                   'Content-Type': 'application/json',
                   'token': 'Bearer ' + token
@@ -53,14 +55,14 @@ const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, exp
   
              const data = await res.json();
              if(data.message === "Updated Successfully") {
-            
+              setLoader(null)
               const newExpenseList = [...expenseList];
               const index = expenseList.findIndex(expense => expense._id === data.updatedExpense._id);
               newExpenseList[index] = data.updatedExpense;
               setExpenseList(newExpenseList)
              return cancelEdit();
              } else {
-              setMessage(data.message) 
+              setLoader(null)
               return cancelEdit();
              }
         } catch (error) {
@@ -73,6 +75,7 @@ const EditableExpense = ({editInputRef, cancelEdit, expense, setExpenseList, exp
   const classes = useStyles();
   return (
     <div className="border-double border-2 border-sky-500">
+        <div className="px-4">{loader}</div>
 <MUIList dense={false} className={classes.listUpdated}>
      <ListItem className={classes.itemUpdated}>
      <div className="flex flex-col justify-center items-start">

@@ -3,13 +3,13 @@ import Line from "./Displays/Line"
 import Polar from "./Displays/Polar"
 import DoughnutView from "./Displays/DoughnutView"
 import {BsFillPersonCheckFill} from "react-icons/bs"
-import {useSelector } from "react-redux"
 import { FiUserX } from "react-icons/fi"
 import PulseLoader from "react-spinners/PulseLoader"
+import {useSelector } from "react-redux"
 import moment from "moment"
 import {MoreVert} from "@material-ui/icons/";
-import {IconButton} from "@material-ui/core"
-const ChartDisplay = ({token,transactionList, profile, logout}) => {
+import {IconButton} from "@material-ui/core";
+const ChartDisplay = ({token,transactionList, profile, logout, userProfileInfo, setUserProfileInfo}) => {
 const { isLoading, user, error } = useSelector(state => state.userProfile)
 const [activeStep, setActiveStep ] = useState(0);
 const [showDeleteBtn, setShowDeleteBtn] = useState(false)
@@ -17,6 +17,17 @@ const [conformDelete, setConfirmDelete] = useState(false)
 const [settings, toggleSettings ] = useState(false)
 const [inputValue, setInputValue] = useState("")
 const [loader, setLoader] = useState("")
+const [imageUrl, setImageUrl ] = useState(null)
+const [saveBtn, setSaveBtn ] = useState(false)
+const [selectBtn, setSelectBtn ] = useState(false)
+const [uploadLoader, setUploadLoader] = useState(null)
+
+
+const showSelectBtn = () => {
+  setSelectBtn(true)
+}
+
+
 const showOrHidSettings = () => {
   toggleSettings(!settings)
 }
@@ -83,6 +94,60 @@ try {
 }
 }
 
+//user profile
+
+const url = process.env.REACT_APP_CLOUDINARY_URL;
+const onSelectedFiles = async (e) => {
+  const files = e.target.files;
+  const data = new FormData()
+  data.append('file', files[0])
+  data.append('upload_preset', process.env.REACT_APP_UPLOAD_PRESET)
+try {
+  setSelectBtn(false)
+  setUploadLoader(<PulseLoader size={5}/>)
+  const res = await fetch(url, {
+    method: 'POST',
+    body: data
+  })
+  const file = await res.json();
+  console.log("File", file.secure_url)
+  setUserProfileInfo({...userProfileInfo, profilePicture: file.secure_url})
+  setUploadLoader(null)
+  setSaveBtn(true)
+  return setImageUrl(file.secure_url);
+} catch (error) {
+  console.log(error)
+}
+}
+const updateUserUrl = "https://money-tracking-app-20.herokuapp.com/user/update-profile"
+const formData = {
+  ...userProfileInfo,
+  profilePicture: imageUrl
+}
+
+const saveProfile = async () => {
+  setUploadLoader(<PulseLoader size={5}/>)
+  try {
+    const res = await fetch(updateUserUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': 'Bearer ' + token
+      },
+
+      body: JSON.stringify(formData)
+    })
+
+    const data = await res.json();
+    if(data.message === "Profile Updated Successfully") {
+      setUploadLoader(null)
+      setSaveBtn(false)
+      setUserProfileInfo({...userProfileInfo, profilePicture: data.updatedUser.profilePicture})
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 
 const getActiveStep = (step) => {
@@ -97,15 +162,17 @@ default: return<DoughnutView transactionList={transactionList}/>
 
 
   return (
-    <div className="relative">
+    <div className="h-full relative">
        <div>
-         <h1>Analysis</h1>
+         <div className="flex justify-center items-center">
+         <h1 className="sem-bold">Analysis</h1>
+         </div>
        {getActiveStep(activeStep)}
        </div>
 
        {profile  && 
          <div className="bg-white absolute top-0 right-0 left-0 bottom-0">
-           {isLoading? <div className="flex justify-center items-center h-full"><PulseLoader/></div>:
+           {isLoading? <div className="flex justify-center items-center h-full"><PulseLoader size={5}/></div>:
            error? <h1>Error</h1>:
            <div>
            <div className="flex justify-end items-center w-full" onClick={showOrHidSettings}>
@@ -114,13 +181,29 @@ default: return<DoughnutView transactionList={transactionList}/>
         </IconButton>
          </div>
          <div className="flex flex-col justify-center items-center">
-           <div className={`${user.profilePicture === "https://res.cloudinary.com/dev-ltd/image/upload/v1639572913/sample.jpg"? "relative w-48 h-48 bg-green-500 rounded-full flex justify-center items-center": "relative w-48 h-48 rounded-full flex justify-center items-center"}`}>
-             {user.profilePicture === "https://res.cloudinary.com/dev-ltd/image/upload/v1639572913/sample.jpg"? 
-             <h1 className="text-xl">{user.firstName[0] + user.lastName[0]}</h1>:
-             
-             <img src={user.profilePicture} alt="user profile" className=" asolute w-full h-full object-cover rounded-full"/>
-            }
+
+         <section className="rounded flex justify-center items-center">
+                <label>
+                <div className="cursor-pointer relative" onClick={showSelectBtn}>
+             {userProfileInfo.profilePicture === ""? 
+             <div className="relative w-48 h-48 bg-green-200 rounded-full flex justify-center items-center">
+             <h1 className="text-xl">{user.firstName[0] + user.lastName[0]}</h1>
+             </div>:
+              <div className="relative w-48 h-48 rounded-full flex justify-center items-center">
+             <img src={userProfileInfo.profilePicture} alt="user profile" className=" asolute w-full h-full object-cover object-top rounded-full"/> 
+             </div>
+          }
+
+             <div className="flex flex-col justify-center items-center  absolute top-0 right-0 bottom-0 left-0 right-0"> 
+             <div className="mt-5">{uploadLoader}</div>
+             <div className="flex flex-col justify-center items-center">
+           {saveBtn && <button onClick={saveProfile} className="bg-green-400 text-xs p-1 rounded">Save Now</button>}
+              </div>
+              </div>
            </div>
+                <input style={{display: "none"}} type="file" name="images" onChange={onSelectedFiles} multiple accept ="image/png, image/jpeg, image/webp"/>
+               </label>
+         </section>
            <div className="mt-5 flex flex-col justify-center items-center">
            <h1>{user.firstName + " " + user.lastName}</h1>
            <p className="text-sm">{user.email}</p>
@@ -138,19 +221,14 @@ default: return<DoughnutView transactionList={transactionList}/>
           {settings &&
           <div className="bg-gray-50 absolute p-1 top-12 right-0 rounded">
           <ul className="space-y-2">
-        <li>
-           <p class="cursor-pointer flex items-center px-1 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-              <span className="text-sm flex-1 ml-3 whitespace-nowrap">Edit</span>
+          <li onClick = {logout}>
+           <p className="cursor-pointer flex items-center px-1 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <span className="text-sm flex-1 ml-3 whitespace-nowrap">Logout</span>
            </p>
         </li>
         <li onClick={showDelete}>
            <p className="cursor-pointer flex items-center px-1 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
               <span className="hover:text-red-500 text-sm flex-1 ml-3 whitespace-nowrap">Delete</span>
-           </p>
-        </li>
-        <li onClick = {logout}>
-           <p className="cursor-pointer flex items-center px-1 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-              <span className="text-sm flex-1 ml-3 whitespace-nowrap">Logout</span>
            </p>
         </li>
         </ul>
