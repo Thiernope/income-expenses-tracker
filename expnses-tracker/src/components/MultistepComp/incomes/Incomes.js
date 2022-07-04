@@ -80,7 +80,8 @@ const toggleEditInputRef = () => {
       </div>: updateLoader != null? <div className="flex justify-center items-center h-screen"> {updateLoader}</div>:
       <div className="empty">
         {start === false?  
-           <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute top-0 left-0 ">
+           <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute top-0 left-0" data-aos="fade-down"
+           data-aos-duration="1000">
            <h1>Take a Tour!</h1>
            <p className="text-center text-xs w-5/6">Would you like to use my alan ai Robot? </p>
            <FaRobot className="text-7xl"/>
@@ -112,7 +113,7 @@ const toggleEditInputRef = () => {
       </div>
 
       { createIndicator &&
-         <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 right-12 rounded-t-full rounded-bl-full ">
+         <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 right-12 rounded-t-full rounded-bl-full" data-aos="fade-right">
          <p className="text-center text-xs w-5/6">Add either new source of income or new potential expense</p>
          <div className="mt-5 flex justify-between items-center">
           <p onClick = {hideCreate} className="cursor-pointer bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ml-3">Prev</p>
@@ -121,7 +122,7 @@ const toggleEditInputRef = () => {
         </div> 
       }
       { switchIndicator && 
-      <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 left-12 rounded-t-full rounded-br-full ">
+      <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 left-12 rounded-t-full rounded-br-full " data-aos="fade-left">
       <p className="text-center text-xs w-5/6">Switch to see either expenses list or sources of incomes available</p>
       <div className="mt-5 flex justify-between items-center">
       <p onClick = {hideSwitch} className="cursor-pointer bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ml-3">Prev</p>

@@ -72,7 +72,7 @@ try {
 </div>: null
     }
     
-    <div className="p-4 form w-80">
+    <div className="p-4 form w-80" data-aos="zoom-in-left">
    <form>
    <h1 className="text-xl mb-5">Reset your password</h1>
   <div className="relative z-0 w-full mb-6 group">

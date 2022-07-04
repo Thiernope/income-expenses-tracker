@@ -25,7 +25,7 @@ const EmailVerification = () => {
     
   return (
     <div className=" flex flex-col justify-center items-center h-screen">
-    <div className="p-4 form w-80">
+    <div className="p-4 form w-80" data-aos="zoom-in-left">
     <h1 className="text-xl mb-5">Email Verification</h1>
     <div className="mb-5">
     {successMessage !== ""? 

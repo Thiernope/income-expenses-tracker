@@ -164,7 +164,7 @@ try {
 </div>
 </form>
     {dipositIndicator &&
-     <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 left-32 rounded-b-full rounded-tr-full ">
+     <div className="flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 left-32 rounded-b-full rounded-tr-full " data-aos="fade-right">
      <p className="text-center text-xs w-5/6">Make deposit! register any amount earned from any of the registered sources of income.</p>
      <div className="mt-5 flex justify-between items-center">
          <p onClick = {hideDeposit}  className="cursor-pointer bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ml-3">Prev</p>
@@ -173,7 +173,7 @@ try {
        </div>
       }
        {  withdrawIndicator && 
-         <div className="z-50 flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 -right-20 rounded-b-full rounded-tr-full ">
+         <div className="z-50 flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute bottom-12 -right-20 rounded-b-full rounded-tr-full" data-aos="fade-right">
          <p className="text-center text-xs w-5/6">Withdraw. Register any amount you are going to spent on one of the registered potential expenses.</p>
          <div className="mt-5 flex justify-between items-center">
            <p onClick = { hideWithdraw} className="cursor-pointer bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ml-3">Prev</p>
@@ -182,7 +182,8 @@ try {
          </div>
        }
       { balanceIndicator && 
-      <div className="z-50 flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute -top-7 -right-12 rounded-b-full rounded-tr-full ">
+      <div className="z-50 flex flex-col justify-center items-center bg-orange-500 w-48 h-48 absolute -top-7 -right-12 rounded-b-full rounded-tr-full " data-aos="fade-up"
+      data-aos-duration="1000">
       <p className="text-center text-xs w-5/6">View your balance to see the amount you have spent and the amount remains in your balace.</p>
       {updateLoader}
       <div className="mt-5 flex justify-between items-center">

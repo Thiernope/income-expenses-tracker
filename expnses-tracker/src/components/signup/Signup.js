@@ -120,7 +120,7 @@ gapi.load('client:auth2', start)
         </button>
       </div>}
         </div>
-        <div className="form w-80">
+        <div className="form w-80" data-aos="zoom-in-left">
         <h1 className="text-xl mb-5">Sign Up</h1>
         <form>
   <div className="relative z-0 w-full mb-6 group">
